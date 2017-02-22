@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 namespace ElectricParse.Domain.Entities
 {
-    [Table("Products")]
-    public class Product
+    [Table("OrderCategories")]
+    public class OrderCategory
     {
-        public Product()
+        public OrderCategory()
         {
 
         }
 
         [Key]
-        public int ID { get; set; }
-        [StringLength(512)]
-        public string Name { set; get; }
-        [StringLength(1024)]
-        public string ImageUrl { set; get; }
-       
+        public int OrderCategoryId { set; get; }
+
+        public int OrderId { set; get; }
+        public int CategoryId { set; get; }
+
+        public virtual Order Order { get; set; }
         public virtual Category Category { get; set; }
     }
 }

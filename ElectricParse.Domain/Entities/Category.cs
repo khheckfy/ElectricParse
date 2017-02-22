@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ElectricParse.Domain.Entities
 {
+    [Table("Categories")]
     public class Category
     {
-        public Guid ID { private set; get; }
-        public string Name { private set; get; }
-        public string Url { set; get; }
-        public Guid? ParentCategoryId { set; get; }
-
-        public List<Product> Products { set; get; }
-
-        public Category(string name)
+        public Category()
         {
-            ID = Guid.NewGuid();
-            Name = name;
-            Products = new List<Product>();
+            Products = new HashSet<Product>();
         }
+
+        [Key]
+        public int CategoryId { private set; get; }
+        
+        [StringLength(255)]
+        public string Name { private set; get; }
+        
+        public int? ParentCategoryId { set; get; }
+        public virtual Category ParentCategory { get; set; }
+        [ForeignKey("ParentCategoryId")]
+        public virtual ICollection<Category> ChildCategories { get; set; }
+        public virtual ICollection<Product> Products { get; set; }
     }
 }

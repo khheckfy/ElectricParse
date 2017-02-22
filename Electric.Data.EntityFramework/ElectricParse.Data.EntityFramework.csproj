@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A67B212A-F263-4419-96DE-F9B28B87B508}</ProjectGuid>
+    <ProjectGuid>{548191D6-B008-4031-A946-EE3D0F708299}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ElectricParse.Domain</RootNamespace>
-    <AssemblyName>ElectricParse.Domain</AssemblyName>
+    <RootNamespace>ElectricParse.Data.EntityFramework</RootNamespace>
+    <AssemblyName>ElectricParse.Data.EntityFramework</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -48,24 +48,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Category.cs" />
-    <Compile Include="Entities\OrderCategory.cs" />
-    <Compile Include="Entities\OrderCategoryProduct.cs" />
-    <Compile Include="Entities\Product.cs" />
-    <Compile Include="Entities\Order.cs" />
-    <Compile Include="IUnitOfWork.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="ModelDataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\ICategoryRepository.cs" />
-    <Compile Include="Repositories\IOrderCategoryProductRepository.cs" />
-    <Compile Include="Repositories\IOrderCategoryRepository.cs" />
-    <Compile Include="Repositories\IOrderRepository.cs" />
-    <Compile Include="Repositories\IProductRepository.cs" />
-    <Compile Include="Repositories\IRepository.cs" />
+    <Compile Include="Repositories\CategoryRepository.cs" />
+    <Compile Include="Repositories\OrderCategoryProductRepository.cs" />
+    <Compile Include="Repositories\OrderCategoryRepository.cs" />
+    <Compile Include="Repositories\OrderRepository.cs" />
+    <Compile Include="Repositories\ProductRepository.cs" />
+    <Compile Include="Repositories\Repository.cs" />
+    <Compile Include="UnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ElectricParse.Core\ElectricParse.Core.csproj">
+      <Project>{c39bec79-d501-4ceb-acb5-0634f5519c29}</Project>
+      <Name>ElectricParse.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ElectricParse.Domain\ElectricParse.Domain.csproj">
+      <Project>{a67b212a-f263-4419-96de-f9b28b87b508}</Project>
+      <Name>ElectricParse.Domain</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

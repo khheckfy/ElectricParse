@@ -49,9 +49,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Electric.Data.EntityFramework\ElectricParse.Data.EntityFramework.csproj">
+      <Project>{548191d6-b008-4031-a946-ee3d0f708299}</Project>
+      <Name>ElectricParse.Data.EntityFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ElectricParse.BusinessLayer\ElectricParse.BusinessLayer.csproj">
       <Project>{40cc6828-25cf-4cf9-9b4f-705da2b552e2}</Project>
       <Name>ElectricParse.BusinessLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ElectricParse.Core\ElectricParse.Core.csproj">
+      <Project>{c39bec79-d501-4ceb-acb5-0634f5519c29}</Project>
+      <Name>ElectricParse.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ElectricParse.Domain\ElectricParse.Domain.csproj">
       <Project>{a67b212a-f263-4419-96de-f9b28b87b508}</Project>
