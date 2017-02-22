@@ -78,6 +78,7 @@ namespace ElectricParse.BusinessLayer
                             OrderCategory rootInnerOrderCategory = new OrderCategory();
                             rootInnerOrderCategory.Category = rootInnerCategory;
                             rootInnerOrderCategory.ParentOrderCategory = rootOrderCategory;
+                            rootInnerOrderCategory.Url = p.ParentNode.Attributes["href"].Value;
                             rootOrderCategory.OrderCategories.Add(rootInnerOrderCategory);
                         }
 

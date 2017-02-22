@@ -23,6 +23,8 @@ namespace ElectricParse.Domain.Entities
         [Required]
         public int CategoryId { set; get; }
         public int? ParentOrderCategoryId { get; set; }
+        [StringLength(512)]
+        public string Url { set; get; }
 
         public virtual Order Order { get; set; }
         public virtual Category Category { get; set; }
