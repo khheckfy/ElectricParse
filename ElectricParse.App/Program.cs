@@ -15,7 +15,10 @@ namespace ElectricParse.App
 
         static void Main(string[] args)
         {
-            (new ParserService(db)).ParseCategories(); 
+            int orderId = 4;// (new ParserService(db)).ParseCategories();
+
+
+
             Console.ReadLine();
         }
     }

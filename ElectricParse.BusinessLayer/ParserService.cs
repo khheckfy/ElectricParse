@@ -21,10 +21,8 @@ namespace ElectricParse.BusinessLayer
             db = _db;
         }
 
-        public List<Category> ParseCategories()
+        public int ParseCategories()
         {
-            List<Category> categories = new List<Category>();
-
             Order order = new Order();
 
             string url = string.Format("{0}catalog/", site);
@@ -60,78 +58,139 @@ namespace ElectricParse.BusinessLayer
                         //Ищем группы
                         //Найдем в группе ее название, Это h3
                         var h3 = g.Descendants("h3").FirstOrDefault();
-                        var rootCategory = db.CategoryRepository.GetByName(h3.InnerText);
-                        if (rootCategory == null)
-                            rootCategory = CreateCategory(h3.InnerText);
+                        var rootCategory = CreateCategory(h3.InnerText);
                         OrderCategory rootOrderCategory = new OrderCategory();
                         rootOrderCategory.Category = rootCategory;
-
+                        rootOrderCategory.IsMain = true;
 
                         //Ищем группы
                         //Найдем в группе все дочерние группы, Это p
                         foreach (var p in g.Descendants("p"))
                         {
-                            var rootInnerCategory = db.CategoryRepository.GetByName(p.InnerText);
-                            if (rootInnerCategory == null)
-                                rootInnerCategory = CreateCategory(p.InnerText);
+                            if (p.ParentNode.Attributes.Contains("class") && p.ParentNode.Attributes["class"].Value == "ur2")
+                                continue;
+
+                            var rootInnerCategory = CreateCategory(p.InnerText);
 
                             OrderCategory rootInnerOrderCategory = new OrderCategory();
                             rootInnerOrderCategory.Category = rootInnerCategory;
                             rootInnerOrderCategory.ParentOrderCategory = rootOrderCategory;
                             rootInnerOrderCategory.Url = p.ParentNode.Attributes["href"].Value;
+                            rootInnerOrderCategory.IsMain = true;
+
+                            //Перейти на новую страницы подкатегории и скачать все категории оттуда
+                            LoadUnderCategories(rootInnerOrderCategory);
+
                             rootOrderCategory.OrderCategories.Add(rootInnerOrderCategory);
                         }
-
-
-
-
 
                         order.OrderCategories.Add(rootOrderCategory);
                     }
 
                     db.OrderRepository.Add(order);
                     db.SaveChanges();
-
-
-                    //foreach (var node in nodes)
-                    //{
-                    //    string href = node.GetAttributeValue("href", string.Empty);
-                    //    if (!href.StartsWith(url))
-                    //        continue;
-                    //    string name = string.Empty;
-                    //    if (node.FirstChild == null)
-                    //        continue;
-
-                    //    if (node.FirstChild.Name == "div")
-                    //        continue;
-
-                    //    name = node.FirstChild.InnerText;
-                    //    bool isHead = false;
-                    //    if (node.FirstChild.Name == "h3")
-                    //    {
-                    //        isHead = true;
-                    //    }
-
-
-                    //    Category category = db.CategoryRepository.GetByName(node.InnerText);
-                    //    if (category == null)
-                    //    {
-                    //        CreateCategory(name);
-                    //    }
-                    //}
                 }
             }
 
 
 
-            return categories;
+            return order.OrderId;
+        }
+
+        private void LoadUnderCategories(OrderCategory rootOrderCategory)
+        {
+            string html = GetPageHtml(rootOrderCategory.Url);
+            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            htmlDoc.OptionFixNestedTags = true;
+            htmlDoc.LoadHtml(html);
+
+            var queryTreeNode = from a in htmlDoc.DocumentNode.SelectNodes("//a").Cast<HtmlNode>()
+                                where
+                                a.Attributes.Contains("class") &&
+                                (a.Attributes["class"].Value == "ur2" || a.Attributes["class"].Value == "ur2_vib")
+                                select a;
+            var treeNodes = queryTreeNode.ToList();
+            if (treeNodes.Count == 0)
+                treeNodes.Add(htmlDoc.GetElementbyId("vib"));
+
+            treeNodes.ForEach(node =>
+                {
+                    string name = node.Descendants("p").First().InnerHtml;
+                    Category category = CreateCategory(name);
+                    if (category.CategoryId == rootOrderCategory.CategoryId)
+                    {
+                        LoadProducts(rootOrderCategory, null, html);
+                    }
+                    else
+                    {
+                        string url = node.Attributes["href"].Value;
+                        OrderCategory orderCategory = new OrderCategory();
+                        orderCategory.Category = category;
+                        orderCategory.Url = url;
+                        orderCategory.ParentOrderCategory = rootOrderCategory;
+                        orderCategory.IsMain = false;
+
+                        LoadProducts(orderCategory, orderCategory.Url, null);
+
+                        rootOrderCategory.OrderCategories.Add(orderCategory);
+                    }
+                });
+        }
+
+        private void LoadProducts(OrderCategory orderCategory, string url = null, string html = null)
+        {
+            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            if (string.IsNullOrEmpty(html))
+            {
+                html = GetPageHtml(url);
+                htmlDoc.OptionFixNestedTags = true;
+                htmlDoc.LoadHtml(html);
+            }
+            else
+            {
+                htmlDoc.LoadHtml(html);
+            }
+
+            var tovars = (from div in htmlDoc.DocumentNode.SelectNodes("//div").Cast<HtmlNode>()
+                          from table in div.Descendants("table").Cast<HtmlNode>()
+                          from row in table.Descendants("tr").Cast<HtmlNode>()
+                          where
+                               div.Attributes.Contains("class") && div.Attributes["class"].Value == "tovar"
+                          select row
+                         ).Skip(1).ToList();
+
+            tovars.ForEach(row =>
+            {
+                string imageUrl = (from x in row.Descendants("a") where x.Attributes.Contains("rel") && x.Attributes["rel"].Value == "prettyPhoto" select x.Attributes["href"].Value).FirstOrDefault();
+                string name = row.Descendants("td").Skip(1).First().FirstChild.InnerText;
+                string sPrice = row.Descendants("td").Skip(2).First().FirstChild.InnerText;
+                decimal price = 0;
+                if (!decimal.TryParse(sPrice, out price))
+                    if (!decimal.TryParse(sPrice.Replace(",", "."), out price))
+                        if (!decimal.TryParse(sPrice.Replace(".", ","), out price))
+                            price = 0;
+                Product product = CreateProduct(name);
+                OrderCategoryProduct ocp = new OrderCategoryProduct()
+                {
+                    Product = product,
+                    ImageUrl = imageUrl,
+                    Price = price
+                };
+                orderCategory.OrderCategoryProducts.Add(ocp);
+            });
+
+
         }
 
         #region private methods
 
         private Category CreateCategory(string name)
         {
-            var cat = new Category()
+            var cat = db.CategoryRepository.GetByName(name);
+            if (cat != null)
+                return cat;
+
+            cat = new Category()
             {
                 Name = name
             };
@@ -139,6 +198,22 @@ namespace ElectricParse.BusinessLayer
             db.SaveChanges();
 
             return cat;
+        }
+
+        private Product CreateProduct(string name)
+        {
+            var prod = db.ProductRepository.GetByName(name);
+            if (prod != null)
+                return prod;
+
+            prod = new Product()
+            {
+                Name = name
+            };
+            db.ProductRepository.Add(prod);
+            db.SaveChanges();
+
+            return prod;
         }
 
         string GetPageHtml(string link, WebProxy proxy = null)
@@ -156,7 +231,7 @@ namespace ElectricParse.BusinessLayer
 
                     if (result.Contains("шибка соединени"))
                     {
-                        Thread.Sleep(TimeSpan.FromSeconds(10));
+                        Thread.Sleep(TimeSpan.FromSeconds((new Random().Next(7, 20))));
                         continue;
                     }
 

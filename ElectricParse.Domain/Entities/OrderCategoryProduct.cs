@@ -25,7 +25,10 @@ namespace ElectricParse.Domain.Entities
 
         [Column(TypeName = "money")]
         public decimal? Price { get; set; }
-        
+
+        [StringLength(1024)]
+        public string ImageUrl { set; get; }
+
         public virtual OrderCategory OrderCategory { set; get; }
         public virtual Product Product { set; get; }
     }
