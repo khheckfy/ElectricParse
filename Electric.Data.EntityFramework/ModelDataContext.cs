@@ -21,6 +21,7 @@ namespace ElectricParse.Data.EntityFramework
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

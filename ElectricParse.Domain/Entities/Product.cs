@@ -22,7 +22,5 @@ namespace ElectricParse.Domain.Entities
         public string Name { set; get; }
         [StringLength(1024)]
         public string ImageUrl { set; get; }
-       
-        public virtual Category Category { get; set; }
     }
 }

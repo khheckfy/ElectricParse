@@ -9,5 +9,6 @@ namespace ElectricParse.Domain.Repositories
 {
     public interface ICategoryRepository : IRepository<Category>
     {
+        Category GetByName(string name);
     }
 }

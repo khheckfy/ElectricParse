@@ -1,4 +1,5 @@
-﻿using ElectricParse.Data.EntityFramework;
+﻿using ElectricParse.BusinessLayer;
+using ElectricParse.Data.EntityFramework;
 using ElectricParse.Domain;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,12 @@ namespace ElectricParse.App
 {
     class Program
     {
+        private static IUnitOfWork db = new UnitOfWork();
+
         static void Main(string[] args)
         {
-            IUnitOfWork db = new UnitOfWork();
-            db.CategoryRepository.GetAll();
+            (new ParserService(db)).ParseCategories(); 
+            Console.ReadLine();
         }
     }
 }

@@ -13,19 +13,11 @@ namespace ElectricParse.Domain.Entities
     {
         public Category()
         {
-            Products = new HashSet<Product>();
         }
 
         [Key]
-        public int CategoryId { private set; get; }
-        
-        [StringLength(255)]
-        public string Name { private set; get; }
-        
-        public int? ParentCategoryId { set; get; }
-        public virtual Category ParentCategory { get; set; }
-        [ForeignKey("ParentCategoryId")]
-        public virtual ICollection<Category> ChildCategories { get; set; }
-        public virtual ICollection<Product> Products { get; set; }
+        public int CategoryId { set; get; }
+        [StringLength(512)]
+        public string Name { set; get; }
     }
 }

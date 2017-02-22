@@ -13,16 +13,21 @@ namespace ElectricParse.Domain.Entities
     {
         public OrderCategory()
         {
-
+            OrderCategories = new HashSet<OrderCategory>();
         }
 
         [Key]
         public int OrderCategoryId { set; get; }
-
+        [Required]
         public int OrderId { set; get; }
+        [Required]
         public int CategoryId { set; get; }
+        public int? ParentOrderCategoryId { get; set; }
 
         public virtual Order Order { get; set; }
         public virtual Category Category { get; set; }
+        [ForeignKey("ParentOrderCategoryId")]
+        public virtual ICollection<OrderCategory> OrderCategories { get; set; }
+        public virtual OrderCategory ParentOrderCategory { get; set; }
     }
 }

@@ -18,15 +18,15 @@ namespace ElectricParse.Domain.Entities
 
         [Key]
         public int OrderCategoryProductId { set; get; }
-        
+
         public int OrderCategoryId { set; get; }
+
         public int ProductId { set; get; }
+
         [Column(TypeName = "money")]
         public decimal? Price { get; set; }
         
         public virtual OrderCategory OrderCategory { set; get; }
         public virtual Product Product { set; get; }
-
-
     }
 }

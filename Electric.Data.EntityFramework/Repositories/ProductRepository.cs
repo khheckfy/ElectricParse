@@ -14,5 +14,10 @@ namespace ElectricParse.Data.EntityFramework.Repositories
             : base(context)
         {
         }
+
+        public Product GetByName(string name)
+        {
+            return Set.FirstOrDefault(n => n.Name == name);
+        }
     }
 }

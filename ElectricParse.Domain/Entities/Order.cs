@@ -19,6 +19,7 @@ namespace ElectricParse.Domain.Entities
 
         [Key]
         public int OrderId { set; get; }
+        [Required]
         public DateTime CreatedDate { set; get; }
         public virtual ICollection<OrderCategory> OrderCategories { set; get; }
     }
