@@ -28,12 +28,12 @@ namespace ElectricParse.BusinessLayer
         public void Generate()
         {
             string fileName = string.Format(@"C:\temp\{0:dd_MM_yyyy_HH_mm_ss}.xlsx", DateTime.Now);
-            string dir = string.Format(@"C:\temp\images");
+            //string dir = string.Format(@"C:\temp\images");
+            //DirectoryInfo di = new DirectoryInfo(dir);
+            //di.GetFiles().ToList().ForEach(file => File.Delete(file.FullName));
+            string dir = string.Format(@"C:\temp");
             DirectoryInfo di = new DirectoryInfo(dir);
-            di.GetFiles().ToList().ForEach(file => File.Delete(file.FullName));
-            dir = string.Format(@"C:\temp");
-            di = new DirectoryInfo(dir);
-            di.GetFiles("*.xlsx").ToList().ForEach(file => File.Delete(file.FullName));
+            //di.GetFiles("*.xlsx").ToList().ForEach(file => File.Delete(file.FullName));
 
 
             FileInfo newFile = new FileInfo(fileName);
@@ -56,14 +56,14 @@ namespace ElectricParse.BusinessLayer
             {
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
                 SetMainCategoryFormat(string.Format("A{0}:E{0}", ri));
-                GenerateLoopCategories(category.OrderCategoryId);
+                GenerateLoopCategories(category.OrderCategoryId, string.Empty);
             }
-
+            ws.Column(2).Width = 6;
             pck.Save();
             System.Diagnostics.Process.Start(fileName);
         }
 
-        private void GenerateLoopCategories(int OrderCategoryId)
+        private void GenerateLoopCategories(int OrderCategoryId, string name)
         {
             var categoriesQuery = from orderCategory in db.OrderCategoryRepository.Query()
                                   join category in db.CategoryRepository.Query() on orderCategory.CategoryId equals category.CategoryId
@@ -75,13 +75,13 @@ namespace ElectricParse.BusinessLayer
                                       category.CategoryId,
                                       orderCategory.OrderCategoryId
                                   };
-            foreach (var category in categoriesQuery.Distinct().ToArray())
+            foreach (var category in categoriesQuery.Distinct().Take(3).ToArray())
             {
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
-                SetUnderCategoryFormat(string.Format("A{0}:E{0}", ri));
+                SetUnderCategoryFormat(string.Format("A{0}:F{0}", ri));
                 GenerateProducts(category.OrderCategoryId);
                 ri++;
-                GenerateLoopCategories(category.OrderCategoryId);
+                GenerateLoopCategories(category.OrderCategoryId, category.Name);
             }
         }
 
@@ -93,7 +93,7 @@ namespace ElectricParse.BusinessLayer
                             select new
                             {
                                 orderProduct.Price,
-                                orderProduct.ImageUrl,
+                                ImagePath = (orderProduct.ProductImage == null ? null : orderProduct.ProductImage.Path),
                                 product.Name
                             })
                             .OrderBy(n => n.Name)
@@ -104,25 +104,31 @@ namespace ElectricParse.BusinessLayer
             ri++;
             int rowStart = ri;
             GenerateProductHeader();
-
+            int productIndex = 1;
             foreach (var product in products)
             {
                 ri++;
-                ws.Cells[string.Format("A{0}", ri)].Value = "";
-                ws.Cells[string.Format("B{0}", ri)].Value = product.Name;
-                ws.Cells[string.Format("C{0}", ri)].Value = product.Price;
-                ws.Cells[string.Format("D{0}", ri)].Value = product.Price * 0.9M;
-                ws.Cells[string.Format("E{0}", ri)].Value = product.Price * 0.7M;
+                ws.Cells[string.Format("A{0}", ri)].Value = productIndex;
+                ws.Cells[string.Format("C{0}", ri)].Value = product.Name;
+                ws.Cells[string.Format("D{0}", ri)].Value = product.Price;
+                ws.Cells[string.Format("E{0}", ri)].Value = product.Price * 0.9M;
+                ws.Cells[string.Format("F{0}", ri)].Value = product.Price * 0.7M;
 
-                if (!string.IsNullOrEmpty(product.ImageUrl))
+                if (!string.IsNullOrEmpty(product.ImagePath))
                 {
-                    Image logo = Image.FromFile(GetImage(product.ImageUrl));
-                    var picture = ws.Drawings.AddPicture(ri.ToString(), logo);
-                    picture.SetPosition(ri, 1, 1, 0);
+                    using (Image logo = Image.FromFile(product.ImagePath))
+                    {
+                        var picture = ws.Drawings.AddPicture(ri.ToString(), logo);
+                        picture.EditAs = OfficeOpenXml.Drawing.eEditAs.OneCell;
+                        picture.SetPosition(ri - 1, 1, 1, 1);
+                    }
+                    ws.Row(ri).Height = 31;
                 }
+
+                productIndex++;
             }
 
-            var modelTable = ws.Cells[string.Format("A{0}:E{1}", rowStart, ri)];
+            var modelTable = ws.Cells[string.Format("A{0}:F{1}", rowStart, ri)];
 
             modelTable.Style.Border.Top.Style = ExcelBorderStyle.Thin;
             modelTable.Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -131,14 +137,16 @@ namespace ElectricParse.BusinessLayer
             modelTable.AutoFitColumns();
         }
 
+
         private void GenerateProductHeader()
         {
-            ws.Cells[string.Format("A{0}", ri)].Value = "";
-            ws.Cells[string.Format("B{0}", ri)].Value = "Наименование";
-            ws.Cells[string.Format("C{0}", ri)].Value = "Цена, руб";
-            ws.Cells[string.Format("D{0}", ri)].Value = "Мелк.опт, руб";
-            ws.Cells[string.Format("E{0}", ri)].Value = "Круп.опт, руб";
-            string address = string.Format("A{0}:E{0}", ri);
+            ws.Cells[string.Format("A{0}", ri)].Value = "№";
+            ws.Cells[string.Format("B{0}", ri)].Value = "";
+            ws.Cells[string.Format("C{0}", ri)].Value = "Наименование";
+            ws.Cells[string.Format("D{0}", ri)].Value = "Цена";
+            ws.Cells[string.Format("E{0}", ri)].Value = "Мелк";
+            ws.Cells[string.Format("F{0}", ri)].Value = "Круп";
+            string address = string.Format("A{0}:F{0}", ri);
             ws.Cells[address].Style.Font.Bold = true;
             ws.Cells[address].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
         }
@@ -158,21 +166,6 @@ namespace ElectricParse.BusinessLayer
             ws.Cells[address].Style.Font.Size = 14;
             ws.Cells[address].Merge = true;
             ws.Cells[address].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-        }
-
-        private string GetImage(string link)
-        {
-            WebClient client = new WebClient() { Encoding = Encoding.GetEncoding("windows-1251") };
-            System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-            client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-
-            using (client)
-            {
-                string fileName = string.Format(@"C:\temp\images\{0}.jpg", Guid.NewGuid());
-                byte[] result = client.DownloadData(link);
-                File.WriteAllBytes(fileName, result);
-                return fileName;
-            }
         }
     }
 }

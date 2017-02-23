@@ -3,6 +3,9 @@ using ElectricParse.Domain.Entities;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -58,6 +61,7 @@ namespace ElectricParse.BusinessLayer
                         //Ищем группы
                         //Найдем в группе ее название, Это h3
                         var h3 = g.Descendants("h3").FirstOrDefault();
+                        Console.WriteLine(h3.InnerText);
                         var rootCategory = CreateCategory(h3.InnerText);
                         OrderCategory rootOrderCategory = new OrderCategory();
                         rootOrderCategory.Category = rootCategory;
@@ -71,7 +75,7 @@ namespace ElectricParse.BusinessLayer
                                 continue;
 
                             var rootInnerCategory = CreateCategory(p.InnerText);
-
+                            Console.WriteLine("\t" + p.InnerText);
                             OrderCategory rootInnerOrderCategory = new OrderCategory();
                             rootInnerOrderCategory.Category = rootInnerCategory;
                             rootInnerOrderCategory.ParentOrderCategory = rootOrderCategory;
@@ -162,6 +166,21 @@ namespace ElectricParse.BusinessLayer
             tovars.ForEach(row =>
             {
                 string imageUrl = (from x in row.Descendants("a") where x.Attributes.Contains("rel") && x.Attributes["rel"].Value == "prettyPhoto" select x.Attributes["href"].Value).FirstOrDefault();
+                ProductImage image = null;
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    image = db.ProductImageRepository.GetByUrl(imageUrl);
+                    if (image == null)
+                    {
+                        image = new ProductImage()
+                        {
+                            ImageUrl = imageUrl,
+                            Path = GetImage(imageUrl)
+                        };
+                        db.ProductImageRepository.Add(image);
+                        db.SaveChanges();
+                    }
+                }
                 string name = row.Descendants("td").Skip(1).First().FirstChild.InnerText;
                 string sPrice = row.Descendants("td").Skip(2).First().FirstChild.InnerText;
                 decimal price = 0;
@@ -173,8 +192,8 @@ namespace ElectricParse.BusinessLayer
                 OrderCategoryProduct ocp = new OrderCategoryProduct()
                 {
                     Product = product,
-                    ImageUrl = imageUrl,
-                    Price = price
+                    Price = price,
+                    ProductImage = image
                 };
                 orderCategory.OrderCategoryProducts.Add(ocp);
             });
@@ -216,6 +235,23 @@ namespace ElectricParse.BusinessLayer
             return prod;
         }
 
+        private string GetImage(string link)
+        {
+            WebClient client = new WebClient() { Encoding = Encoding.GetEncoding("windows-1251") };
+            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+
+            using (client)
+            {
+                string fileName = string.Format(@"C:\temp\images\{0}.jpg", Guid.NewGuid());
+                byte[] result = client.DownloadData(link);
+                File.WriteAllBytes(fileName, result);
+                var img = resizeImage(80, 80, fileName);
+                img.Save(fileName);
+                return fileName;
+            }
+        }
+
         string GetPageHtml(string link, WebProxy proxy = null)
         {
             WebClient client = new WebClient() { Encoding = Encoding.GetEncoding("windows-1251") };
@@ -238,6 +274,66 @@ namespace ElectricParse.BusinessLayer
                     return result;
                 }
             }
+        }
+
+        public Image resizeImage(int newWidth, int newHeight, string stPhotoPath)
+        {
+            Image imgPhoto = Image.FromFile(stPhotoPath);
+
+            int sourceWidth = imgPhoto.Width;
+            int sourceHeight = imgPhoto.Height;
+
+            //Consider vertical pics
+            if (sourceWidth < sourceHeight)
+            {
+                int buff = newWidth;
+
+                newWidth = newHeight;
+                newHeight = buff;
+            }
+
+            int sourceX = 0, sourceY = 0, destX = 0, destY = 0;
+            float nPercent = 0, nPercentW = 0, nPercentH = 0;
+
+            nPercentW = ((float)newWidth / (float)sourceWidth);
+            nPercentH = ((float)newHeight / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+            {
+                nPercent = nPercentH;
+                destX = System.Convert.ToInt16((newWidth -
+                          (sourceWidth * nPercent)) / 2);
+            }
+            else
+            {
+                nPercent = nPercentW;
+                destY = System.Convert.ToInt16((newHeight -
+                          (sourceHeight * nPercent)) / 2);
+            }
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+
+            Bitmap bmPhoto = new Bitmap(newWidth, newHeight,
+                          PixelFormat.Format24bppRgb);
+
+            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
+                         imgPhoto.VerticalResolution);
+
+            Graphics grPhoto = Graphics.FromImage(bmPhoto);
+            grPhoto.Clear(Color.White);
+            grPhoto.InterpolationMode =
+                System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+            grPhoto.DrawImage(imgPhoto,
+                new Rectangle(destX, destY, destWidth, destHeight),
+                new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
+                GraphicsUnit.Pixel);
+
+            grPhoto.Dispose();
+            imgPhoto.Dispose();
+
+            return bmPhoto;
         }
 
         #endregion

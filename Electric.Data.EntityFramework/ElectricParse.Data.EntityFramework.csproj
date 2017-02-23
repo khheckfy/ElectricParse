@@ -48,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Migrations\201702231305262_image.cs" />
+    <Compile Include="Migrations\201702231305262_image.Designer.cs">
+      <DependentUpon>201702231305262_image.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelDataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,7 +78,11 @@
       <Name>ElectricParse.Domain</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201702231305262_image.resx">
+      <DependentUpon>201702231305262_image.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
