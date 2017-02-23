@@ -55,6 +55,7 @@
     <Compile Include="Repositories\OrderCategoryProductRepository.cs" />
     <Compile Include="Repositories\OrderCategoryRepository.cs" />
     <Compile Include="Repositories\OrderRepository.cs" />
+    <Compile Include="Repositories\ProductImageRepository.cs" />
     <Compile Include="Repositories\ProductRepository.cs" />
     <Compile Include="Repositories\Repository.cs" />
     <Compile Include="UnitOfWork.cs" />

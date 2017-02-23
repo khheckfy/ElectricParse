@@ -3,9 +3,9 @@ using ElectricParse.Domain.Repositories;
 
 namespace ElectricParse.Data.EntityFramework.Repositories
 {
-    internal class OrderRepository : Repository<Order>, IOrderRepository
+    internal class ProductImageRepository : Repository<ProductImage>, IProductImageRepository
     {
-        internal OrderRepository(ModelDataContext context)
+        internal ProductImageRepository(ModelDataContext context)
             : base(context)
         {
         }

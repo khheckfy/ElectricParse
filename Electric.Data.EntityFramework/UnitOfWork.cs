@@ -20,6 +20,7 @@ namespace ElectricParse.Data.EntityFramework
         private IOrderCategoryRepository _orderCategoryRepository;
         private IOrderRepository _orderRepository;
         private IProductRepository _productRepository;
+        private IProductImageRepository _productImageRepository;
 
         #endregion
 
@@ -31,6 +32,10 @@ namespace ElectricParse.Data.EntityFramework
         #endregion
 
         #region IUnitOfWork Members
+        public IProductImageRepository ProductImageRepository
+        {
+            get { return _productImageRepository ?? (_productImageRepository = new ProductImageRepository(_context)); }
+        }
 
         public ICategoryRepository CategoryRepository
         {

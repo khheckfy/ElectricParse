@@ -17,6 +17,7 @@ namespace ElectricParse.Domain
         IOrderCategoryRepository OrderCategoryRepository { get; }
         IOrderRepository OrderRepository { get; }
         IProductRepository ProductRepository { get; }
+        IProductImageRepository ProductImageRepository { get; }
 
         #endregion
 

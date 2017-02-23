@@ -55,12 +55,14 @@
     <Compile Include="Entities\OrderCategoryProduct.cs" />
     <Compile Include="Entities\Product.cs" />
     <Compile Include="Entities\Order.cs" />
+    <Compile Include="Entities\ProductImage.cs" />
     <Compile Include="IUnitOfWork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ICategoryRepository.cs" />
     <Compile Include="Repositories\IOrderCategoryProductRepository.cs" />
     <Compile Include="Repositories\IOrderCategoryRepository.cs" />
     <Compile Include="Repositories\IOrderRepository.cs" />
+    <Compile Include="Repositories\IProductImageRepository.cs" />
     <Compile Include="Repositories\IProductRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
   </ItemGroup>
