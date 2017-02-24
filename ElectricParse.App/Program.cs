@@ -27,7 +27,7 @@ namespace ElectricParse.App
             //});
 
             //return;
-            int orderId = 6;// ().ParseCategories();
+            int orderId = 1;// ps.ParseCategories();
 
             ExcelCreator excelCreator = new ExcelCreator(db, orderId);
             excelCreator.Generate();

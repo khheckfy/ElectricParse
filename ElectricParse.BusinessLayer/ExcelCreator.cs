@@ -56,11 +56,12 @@ namespace ElectricParse.BusinessLayer
             {
                 Console.WriteLine(category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
-                SetMainCategoryFormat(string.Format("A{0}:E{0}", ri));
+                SetMainCategoryFormat(string.Format("A{0}:F{0}", ri));
                 ri++;
                 GenerateLoopCategories(category.OrderCategoryId, string.Empty);
             }
             ws.Column(2).Width = 6;
+            ws.DeleteColumn(2);
             pck.Save();
             System.Diagnostics.Process.Start(fileName);
         }
@@ -77,7 +78,7 @@ namespace ElectricParse.BusinessLayer
                                       category.CategoryId,
                                       orderCategory.OrderCategoryId
                                   };
-            foreach (var category in categoriesQuery.Distinct().Take(3).ToArray())
+            foreach (var category in categoriesQuery.Distinct().ToArray())
             {
                 Console.WriteLine("\t" + category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
@@ -117,16 +118,20 @@ namespace ElectricParse.BusinessLayer
                 ws.Cells[string.Format("E{0}", ri)].Value = product.Price * 0.9M;
                 ws.Cells[string.Format("F{0}", ri)].Value = product.Price * 0.7M;
 
-                if (!string.IsNullOrEmpty(product.ImagePath))
-                {
-                    using (Image logo = Image.FromFile(product.ImagePath))
-                    {
-                        var picture = ws.Drawings.AddPicture(ri.ToString(), logo);
-                        picture.EditAs = OfficeOpenXml.Drawing.eEditAs.OneCell;
-                        picture.SetPosition(ri - 1, 1, 1, 1);
-                    }
-                    ws.Row(ri).Height = 31;
-                }
+
+                ws.Cells[string.Format("A{0}", ri)].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[string.Format("A{0}", ri)].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+
+                //if (!string.IsNullOrEmpty(product.ImagePath))
+                //{
+                //    using (Image logo = Image.FromFile(product.ImagePath))
+                //    {
+                //        var picture = ws.Drawings.AddPicture(ri.ToString(), logo);
+                //        picture.EditAs = OfficeOpenXml.Drawing.eEditAs.OneCell;
+                //        picture.SetPosition(ri - 1, 1, 1, 1);
+                //    }
+                //    ws.Row(ri).Height = 31;
+                //}
 
                 productIndex++;
             }
@@ -152,6 +157,8 @@ namespace ElectricParse.BusinessLayer
             string address = string.Format("A{0}:F{0}", ri);
             ws.Cells[address].Style.Font.Bold = true;
             ws.Cells[address].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells[address].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            ws.Cells[address].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
         }
 
         private void SetMainCategoryFormat(string address)

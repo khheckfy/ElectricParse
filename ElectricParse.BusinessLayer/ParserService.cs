@@ -167,20 +167,20 @@ namespace ElectricParse.BusinessLayer
             {
                 string imageUrl = (from x in row.Descendants("a") where x.Attributes.Contains("rel") && x.Attributes["rel"].Value == "prettyPhoto" select x.Attributes["href"].Value).FirstOrDefault();
                 ProductImage image = null;
-                if (!string.IsNullOrEmpty(imageUrl))
-                {
-                    image = db.ProductImageRepository.GetByUrl(imageUrl);
-                    if (image == null)
-                    {
-                        image = new ProductImage()
-                        {
-                            ImageUrl = imageUrl,
-                            Path = GetImage(imageUrl)
-                        };
-                        db.ProductImageRepository.Add(image);
-                        db.SaveChanges();
-                    }
-                }
+                //if (!string.IsNullOrEmpty(imageUrl))
+                //{
+                //    image = db.ProductImageRepository.GetByUrl(imageUrl);
+                //    if (image == null)
+                //    {
+                //        image = new ProductImage()
+                //        {
+                //            ImageUrl = imageUrl,
+                //            Path = GetImage(imageUrl)
+                //        };
+                //        db.ProductImageRepository.Add(image);
+                //        db.SaveChanges();
+                //    }
+                //}
                 string name = row.Descendants("td").Skip(1).First().FirstChild.InnerText;
                 string sPrice = row.Descendants("td").Skip(2).First().FirstChild.InnerText;
                 decimal price = 0;
