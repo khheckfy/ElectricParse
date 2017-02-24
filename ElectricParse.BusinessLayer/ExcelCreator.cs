@@ -79,6 +79,7 @@ namespace ElectricParse.BusinessLayer
                                   };
             foreach (var category in categoriesQuery.Distinct().Take(3).ToArray())
             {
+                Console.WriteLine("\t" + category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
                 SetUnderCategoryFormat(string.Format("A{0}:F{0}", ri));
                 GenerateProducts(category.OrderCategoryId);
