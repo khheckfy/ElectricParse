@@ -54,8 +54,10 @@ namespace ElectricParse.BusinessLayer
 
             foreach (var category in categoriesQuery.Distinct().ToArray())
             {
+                Console.WriteLine(category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
                 SetMainCategoryFormat(string.Format("A{0}:E{0}", ri));
+                ri++;
                 GenerateLoopCategories(category.OrderCategoryId, string.Empty);
             }
             ws.Column(2).Width = 6;
