@@ -55,7 +55,7 @@ namespace ElectricParse.BusinessLayer
             foreach (var category in categoriesQuery.Distinct().ToArray())
             {
                 Console.WriteLine(category.Name);
-                ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
+                ws.Cells[string.Format("A{0}", ri)].Value = category.Name.ToUpper();
                 SetMainCategoryFormat(string.Format("A{0}:F{0}", ri));
                 ri++;
                 GenerateLoopCategories(category.OrderCategoryId, string.Empty);
@@ -115,8 +115,8 @@ namespace ElectricParse.BusinessLayer
                 ws.Cells[string.Format("A{0}", ri)].Value = productIndex;
                 ws.Cells[string.Format("C{0}", ri)].Value = product.Name;
                 ws.Cells[string.Format("D{0}", ri)].Value = product.Price;
-                ws.Cells[string.Format("E{0}", ri)].Value = product.Price * 0.9M;
-                ws.Cells[string.Format("F{0}", ri)].Value = product.Price * 0.7M;
+                ws.Cells[string.Format("E{0}", ri)].Formula = string.Format("D{0}*0.95", ri);
+                ws.Cells[string.Format("F{0}", ri)].Formula = string.Format("D{0}*0.90", ri);
 
 
                 ws.Cells[string.Format("A{0}", ri)].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -152,8 +152,8 @@ namespace ElectricParse.BusinessLayer
             ws.Cells[string.Format("B{0}", ri)].Value = "";
             ws.Cells[string.Format("C{0}", ri)].Value = "Наименование";
             ws.Cells[string.Format("D{0}", ri)].Value = "Цена";
-            ws.Cells[string.Format("E{0}", ri)].Value = "Мелк";
-            ws.Cells[string.Format("F{0}", ri)].Value = "Круп";
+            ws.Cells[string.Format("E{0}", ri)].Value = "Мелк.опт";
+            ws.Cells[string.Format("F{0}", ri)].Value = "Круп.опт";
             string address = string.Format("A{0}:F{0}", ri);
             ws.Cells[address].Style.Font.Bold = true;
             ws.Cells[address].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
