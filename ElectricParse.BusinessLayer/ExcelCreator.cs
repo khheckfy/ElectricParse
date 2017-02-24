@@ -52,7 +52,7 @@ namespace ElectricParse.BusinessLayer
                                       orderCategory.OrderCategoryId
                                   };
 
-            foreach (var category in categoriesQuery.Distinct().ToArray())
+            foreach (var category in categoriesQuery.Distinct().OrderBy(n => n.Name).ToArray())
             {
                 Console.WriteLine(category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name.ToUpper();
@@ -78,7 +78,7 @@ namespace ElectricParse.BusinessLayer
                                       category.CategoryId,
                                       orderCategory.OrderCategoryId
                                   };
-            foreach (var category in categoriesQuery.Distinct().ToArray())
+            foreach (var category in categoriesQuery.Distinct().OrderBy(n => n.Name).ToArray())
             {
                 Console.WriteLine("\t" + category.Name);
                 ws.Cells[string.Format("A{0}", ri)].Value = category.Name;
